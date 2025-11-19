@@ -9,7 +9,7 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:test
+  // put your main code here, to ru
 }
 
 // put function definitions here:
