@@ -5,10 +5,6 @@
 
 
 
-
-
-
-
 Adafruit_BME280 bme;
 
 int DIN = 18;
@@ -44,10 +40,9 @@ display.display();
 
 
 
-void setup() {
-    void setup() {
- Serial.begin(9600);
- Wire.begin();
+Serial.begin(9600);
+Wire.begin();
+
 bme.begin(0x76);
 }
 
