@@ -23,10 +23,9 @@ int BMESDA = 32;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void setup() {
-if (!display.begin(SSD1306_I2C_ADDRESS, 0x3C)) {
+
 Serial.println(F("SSD1306 allocation failed"));
-for (;;);
-}
+
 display.clearDisplay();
 display.setTextSize(1);
 display.setTextColor(WHITE);
@@ -40,30 +39,21 @@ display.display();
 
 
 
-Serial.begin(9600);
-Wire.begin();
-
-bme.begin(0x76);
-}
-
-
-
-void loop() {
-
-
-}
-display.begin()
-}
-
-
-
-
 
 
 
 
 void loop() {
-float temp
+
+
+
+
+
+
+
+
+
+
 
 }
 
