@@ -24,28 +24,42 @@ int BMESDA = 32;
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, CS, DC, RS);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, DC, RS, CS);
 
-#define BME280_ADDRESS 0x77
+#define BME280_ADDRESS 0x76
 Adafruit_BME280 bme;
 
 void setup() {
+  Serial.begin(9600);
 
-Serial.begin(9600);
-Wire.begin(BMESDA, BMESCL);
-if (!bme.begin(BME280_ADDRESS)) {
-    Serial.println("The address cannot be found for the BME sensor");
-    while(1);
+  // OLED first
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("OLED init failed");
+    while (1);
+  }
+
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.println("OLED OK");
+  display.display();
+
+  // Then BME280
+  Wire.begin(32, 33);
+  if (!bme.begin(0x76) && !bme.begin(0x77)) {
+    Serial.println("BME280 not found");
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println("Sensor offline");
+    display.display();
+    return; // Don't halt the program
+  }
+
+  Serial.println("All devices initialized");
 }
 
 
-if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;);
-}
-Serial.println("Starting BME280...");
-
-}
 void loop() {
 
 
@@ -68,10 +82,6 @@ display.print("P:");
 display.print(bme.readPressure());
 display.println("Pa");
 display.display();
-
-
-
-
 }
 
 
