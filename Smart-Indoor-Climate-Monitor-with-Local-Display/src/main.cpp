@@ -26,7 +26,7 @@ int RS = 4;
 //OLED
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, DC, RS, CS);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, DC, RS, CS, CLK);
 
 
 // Defining RGB pinout
@@ -50,7 +50,7 @@ float humHigh = 60.0;
 WebServer server(80);
 
 void setup() {
-Serial.begin(115200);
+Serial.begin(9600);
 //Leds
 pinMode(RedPin, OUTPUT);
 pinMode(GreenPin, OUTPUT);
