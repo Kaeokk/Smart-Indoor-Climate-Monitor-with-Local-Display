@@ -42,7 +42,7 @@ int BMESDA = 32;
 #define BME280_ADDRESS 0x76
 Adafruit_BME280 bme;
 
-// Thresholds (for when we do the alerts)
+// Thresholds  for alerts
 float tempHigh = 28.0;
 float humHigh = 60.0;
 
@@ -92,33 +92,18 @@ WiFi.begin(ssid, password);
   Serial.println(WiFi.localIP());
   Serial.println("All devices working");
 
-  // WEB SERVER ADDED — super simple page
-  server.on("/", [](){
-    float t = bme.readTemperature();
-    float h = bme.readHumidity();
-    float p = bme.readPressure() / 100.0F;
-    
-    String page = "<html><head><title>Room Monitor</title>"
-                  "<meta http-equiv='refresh' content='5'></head>"  // refresh every 5 sec
-                  "<body style='font-size:50px;text-align:center;margin-top:100px;'>"
-                  "Temp: " + String(t,1) + " C<br>"
-                  "Hum : " + String(h,1) + " %<br>"
-                  "Pres: " + String(p,0) + " hPa"
-                  "</body></html>";
-    server.send(200, "text/html", page);
-  });
+  // WEB SERVER ADD HERE WIP
 
-  server.begin();                     // WEB SERVER ADDED
-  Serial.println("Web server running");  // WEB SERVER ADDED
-}
+  server.begin();                     
+  Serial.println("Web server running");  
 
 
 
 void loop() {
 
-//server
+//call server
 server.handleClient();
-// RGB alert (very simple)          // WEB SERVER ADDED
+
   if (bme.readTemperature() > tempHigh || bme.readHumidity() > humHigh) {
     digitalWrite(RedPin, LOW);
     digitalWrite(GreenPin, HIGH);
