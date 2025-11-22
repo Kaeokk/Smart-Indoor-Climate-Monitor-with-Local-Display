@@ -1,2 +1,6 @@
-# Smart-Indoor-Climate-Monitor-with-Local-Display
-This is a Smart Indoor Climate Monitor with Local Display for a PBL
+
+Smart Indoor Climate Monitor
+Library Study Room Comfort System
+
+Project Overview
+This IoT device continuously monitors temperature, humidity, and air pressure using a BME280 sensor to help detect stuffy or uncomfortable library study rooms.
