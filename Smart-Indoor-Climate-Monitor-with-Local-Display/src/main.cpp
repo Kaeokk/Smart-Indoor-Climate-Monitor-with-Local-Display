@@ -96,14 +96,14 @@ WiFi.begin(ssid, password);
 
   server.begin();                     
   Serial.println("Web server running");  
-
-
+}
 
 void loop() {
 
 //call server
 server.handleClient();
 
+//basic led alerts
   if (bme.readTemperature() > tempHigh || bme.readHumidity() > humHigh) {
     digitalWrite(RedPin, LOW);
     digitalWrite(GreenPin, HIGH);
