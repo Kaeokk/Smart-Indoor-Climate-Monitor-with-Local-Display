@@ -92,6 +92,22 @@ WiFi.begin(ssid, password);
   Serial.println(WiFi.localIP());
   Serial.println("All devices working");
 
+  // WEB SERVER ADDED — super simple page
+  server.on("/", [](){
+    float t = bme.readTemperature();
+    float h = bme.readHumidity();
+    float p = bme.readPressure() / 100.0F;
+    
+    String page = "<html><head><title>Room Monitor</title>"
+                  "<meta http-equiv='refresh' content='5'></head>"  // refresh every 5 sec
+                  "<body style='font-size:50px;text-align:center;margin-top:100px;'>"
+                  "Temp: " + String(t,1) + " C<br>"
+                  "Hum : " + String(h,1) + " %<br>"
+                  "Pres: " + String(p,0) + " hPa"
+                  "</body></html>";
+    server.send(200, "text/html", page);
+  });
+
   // WEB SERVER ADD HERE WIP
 
   server.begin();                     
@@ -105,11 +121,11 @@ server.handleClient();
 
 //basic led alerts
   if (bme.readTemperature() > tempHigh || bme.readHumidity() > humHigh) {
-    digitalWrite(RedPin, LOW);
-    digitalWrite(GreenPin, HIGH);
-  } else {
     digitalWrite(RedPin, HIGH);
     digitalWrite(GreenPin, LOW);
+  } else {
+    digitalWrite(RedPin, LOW);
+    digitalWrite(GreenPin, HIGH);
   }
 
 display.clearDisplay();
