@@ -1,3 +1,5 @@
+// Libraries for the data colection
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -5,6 +7,14 @@
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
 
+// Libraries for the web server
+
+#include <WiFi.h>
+#include <WebServer.h>
+
+//Wifi credentials
+const char* ssid = "Greg";
+const char* password = "password1234";
 
 // Defining OLED pinout
 int DIN = 18;
@@ -12,6 +22,12 @@ int DC = 2;
 int CS = 17;
 int CLK = 5;
 int RS = 4;
+
+//OLED
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, DC, RS, CS);
+
 
 // Defining RGB pinout
 int RedPin = 14;
@@ -22,17 +38,25 @@ int BluePin = 26;
 int BMESCL = 33;
 int BMESDA = 32;
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, DC, RS, CS);
-
+// BME280
 #define BME280_ADDRESS 0x76
 Adafruit_BME280 bme;
 
-void setup() {
-  Serial.begin(9600);
+// Thresholds (for when we do the alerts)
+float tempHigh = 28.0;
+float humHigh = 60.0;
 
-  // OLED first
+// WEB SERVER
+WebServer server(80);
+
+void setup() {
+Serial.begin(115200);
+//Leds
+pinMode(RedPin, OUTPUT);
+pinMode(GreenPin, OUTPUT);
+pinMode(BluePin, OUTPUT);
+
+  // OLED 
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println("OLED init failed");
     while (1);
@@ -44,9 +68,10 @@ void setup() {
   display.setTextColor(SSD1306_WHITE);
   display.println("OLED OK");
   display.display();
+  delay(1000);
 
   // Then BME280
-  Wire.begin(32, 33);
+  Wire.begin(BMESDA, BMESCL);
   if (!bme.begin(0x76) && !bme.begin(0x77)) {
     Serial.println("BME280 not found");
     display.clearDisplay();
@@ -55,15 +80,52 @@ void setup() {
     display.display();
     return; // Don't halt the program
   }
+//initialize wifi
+WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("WiFi connected");
+  Serial.print("IP Address: http:// ");
+  Serial.println(WiFi.localIP());
+  Serial.println("All devices working");
 
-  Serial.println("All devices initialized");
+  // WEB SERVER ADDED — super simple page
+  server.on("/", [](){
+    float t = bme.readTemperature();
+    float h = bme.readHumidity();
+    float p = bme.readPressure() / 100.0F;
+    
+    String page = "<html><head><title>Room Monitor</title>"
+                  "<meta http-equiv='refresh' content='5'></head>"  // refresh every 5 sec
+                  "<body style='font-size:50px;text-align:center;margin-top:100px;'>"
+                  "Temp: " + String(t,1) + " C<br>"
+                  "Hum : " + String(h,1) + " %<br>"
+                  "Pres: " + String(p,0) + " hPa"
+                  "</body></html>";
+    server.send(200, "text/html", page);
+  });
+
+  server.begin();                     // WEB SERVER ADDED
+  Serial.println("Web server running");  // WEB SERVER ADDED
 }
+
 
 
 void loop() {
 
-
-
+//server
+server.handleClient();
+// RGB alert (very simple)          // WEB SERVER ADDED
+  if (bme.readTemperature() > tempHigh || bme.readHumidity() > humHigh) {
+    digitalWrite(RedPin, LOW);
+    digitalWrite(GreenPin, HIGH);
+  } else {
+    digitalWrite(RedPin, HIGH);
+    digitalWrite(GreenPin, LOW);
+  }
 
 display.clearDisplay();
 display.setTextSize(2);
