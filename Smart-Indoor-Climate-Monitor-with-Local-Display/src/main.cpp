@@ -17,10 +17,10 @@ const char* ssid = "Greg";
 const char* password = "password1234";
 
 // Defining OLED pinout
-int DIN = 18;
+int DIN = 23;
 int DC = 2;
 int CS = 17;
-int CLK = 5;
+int CLK = 18;
 int RS = 4;
 
 //OLED
