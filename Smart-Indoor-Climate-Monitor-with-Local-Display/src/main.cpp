@@ -49,6 +49,57 @@ float humHigh = 60.0;
 // WEB SERVER
 WebServer server(80);
 
+#define HISTORY_SIZE 128
+float tempHistory[HISTORY_SIZE];
+float humHistory[HISTORY_SIZE];
+int historyIndex = 0;
+
+unsigned long lastSample = 0;
+
+void addToHistory(float temp, float hum) {
+  tempHistory[historyIndex] = temp;
+  humHistory[historyIndex] = hum;
+
+  historyIndex++;
+  if (historyIndex >= HISTORY_SIZE) historyIndex = 0;
+}
+
+// Draw one history graph curve
+
+void drawGraph(float *dataArray, float minVal, float maxVal) {
+  for (int i = 1; i < HISTORY_SIZE; i++) {
+
+    int x1 = i - 1;
+    int x2 = i;
+
+    float v1 = dataArray[(historyIndex + i - 1) % HISTORY_SIZE];
+    float v2 = dataArray[(historyIndex + i) % HISTORY_SIZE];
+
+    int y1 = map(v1, minVal, maxVal, SCREEN_HEIGHT - 1, 10);
+    int y2 = map(v2, minVal, maxVal, SCREEN_HEIGHT - 1, 10);
+
+    display.drawLine(x1, y1, x2, y2, SSD1306_WHITE);
+  }
+}
+
+// OLED: Draw temperature + humidity historical graph
+void showGraphs() {
+  display.clearDisplay();
+
+  display.setTextColor(SSD1306_WHITE);
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.print("Temp/Humidity Trends");
+
+  // Temperature (upper line)
+  drawGraph(tempHistory, 15, 35);
+
+  // Humidity (lower line)
+  drawGraph(humHistory, 30, 90);
+
+  display.display();
+}
+
 void setup() {
 Serial.begin(9600);
 //Leds
@@ -116,6 +167,7 @@ WiFi.begin(ssid, password);
 
 void loop() {
 
+
 //call server
 server.handleClient();
 
@@ -127,8 +179,16 @@ server.handleClient();
     digitalWrite(RedPin, LOW);
     digitalWrite(GreenPin, HIGH);
   }
+ // Record sensor every 2 seconds
+  if (millis() - lastSample > 2000) {
+    lastSample = millis();
+    addToHistory(t, h);
+  }
 
-display.clearDisplay();
+  // Show graph on OLED
+  showGraphs();
+  
+  display.clearDisplay();
 display.setTextSize(2);
 display.setTextColor(SSD1306_WHITE);
 display.setCursor(0,0);
