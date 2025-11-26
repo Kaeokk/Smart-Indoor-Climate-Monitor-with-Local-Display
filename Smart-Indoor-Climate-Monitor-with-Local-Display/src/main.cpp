@@ -178,31 +178,60 @@ WiFi.begin(ssid, password);
     Serial.print(".");
   }
   Serial.println("WiFi connected");
-  Serial.print("IP Address: http:// ");
+  Serial.print("IP Address: http://");
   Serial.println(WiFi.localIP());
   Serial.println("All devices working");
 
-  // WEB SERVER ADDED — super simple page
+  // WEB SERVER
   server.on("/", [](){
-    float t = bme.readTemperature();
-    float h = bme.readHumidity();
-    float p = bme.readPressure() / 100.0F;
-    
-    String page = "<html><head><title>Room Monitor</title>"
-                  "<meta http-equiv='refresh' content='5'></head>"  // refresh every 5 sec
-                  "<body style='font-size:50px;text-align:center;margin-top:100px;'>"
-                  "Temp: " + String(t,1) + " &deg;C<br>"
-                  "Hum : " + String(h,1) + " %<br>"
-                  "Pres: " + String(p,0) + " hPa"
-                  "</body></html>";
-    server.send(200, "text/html", page);
+    server.send(200, "text/html",
+R"=====(<html><body style="background:#000;color:#0f0;font-family:Arial;text-align:center">
+<h1>T: <span id="t">??</span>&deg;C LIBRARY H: <span id="h">??</span>%</h1>
+<canvas id="c" width="600" height="300"></canvas><br>
+Temp limit <input id="tl" size="2" value="28">
+Hum limit  <input id="hl" size="2" value="60">
+<button onclick="fetch('/set?t='+tl.value+'&h='+hl.value)">SET</button>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+var ctx=document.getElementById('c').getContext('2d');
+var chart=new Chart(ctx,{type:'line',data:{datasets:[
+  {label:'Temp',borderColor:'red',data:[]},
+  {label:'Hum',borderColor:'cyan',data:[]}
+]},options:{animation:false}});
+setInterval(()=>{fetch('/data').then(r=>r.text()).then(x=>{
+  var [t,h]=x.split(',');
+  document.getElementById('t').innerText=t;
+  document.getElementById('h').innerText=h;
+  chart.data.datasets[0].data.push(t);
+  chart.data.datasets[1].data.push(h);
+  chart.data.labels.push('');
+  if(chart.data.labels.length>50){
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+    chart.data.datasets[1].data.shift();
+  }
+  chart.update();
+})},2000);
+</script>
+</body></html>)=====");
   });
 
-  // WEB SERVER ADD HERE WIP
+  server.on("/data", [](){
+    server.send(200, "text/plain", 
+      String(bme.readTemperature(),1) + "," + String(bme.readHumidity(),1));
+  });
+
+  server.on("/set", [](){
+    if(server.hasArg("t")) tempHigh = server.arg("t").toFloat();
+    if(server.hasArg("h")) humHigh  = server.arg("h").toFloat();
+    server.send(200, "text:)", "OK");
+  });
 
   server.begin();                     
   Serial.println("Web server running");  
-  updateOLED();   // show first screen 
+
+  // show first screen 
+  updateOLED();   
 }
 
 void loop() {
