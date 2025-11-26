@@ -152,7 +152,7 @@ WiFi.begin(ssid, password);
     String page = "<html><head><title>Room Monitor</title>"
                   "<meta http-equiv='refresh' content='5'></head>"  // refresh every 5 sec
                   "<body style='font-size:50px;text-align:center;margin-top:100px;'>"
-                  "Temp: " + String(t,1) + " C<br>"
+                  "Temp: " + String(t,1) + " &deg;C<br>"
                   "Hum : " + String(h,1) + " %<br>"
                   "Pres: " + String(p,0) + " hPa"
                   "</body></html>";
@@ -190,7 +190,7 @@ server.handleClient();
   // Show graph on OLED
   showGraphs();
   
-  display.clearDisplay();
+display.clearDisplay();
 display.setTextSize(2);
 display.setTextColor(SSD1306_WHITE);
 display.setCursor(0,0);
