@@ -109,7 +109,7 @@ void updateOLED() {
   display.clearDisplay();
 
   if (showNumbers) {
-    // ---------- BIG NUMBERS ----------
+    //numbers only
     display.setTextSize(2);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(0, 0);
@@ -127,13 +127,13 @@ void updateOLED() {
     display.print((int)(bme.readPressure()/100));
     display.println("hPa");
   } else {
-    // ---------- GRAPH ----------
+    //graph
     display.setTextSize(1);
     display.setCursor(0, 0);
     display.println("Temp & Hum Trend");
 
-    drawGraph(tempHistory, 15, 35);   // Temp line
-    drawGraph(humHistory,  30, 90);   // Hum line
+    drawGraph(tempHistory, 15, 35);
+    drawGraph(humHistory,  30, 90);
   }
 
   display.display();
