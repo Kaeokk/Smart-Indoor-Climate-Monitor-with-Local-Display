@@ -27,6 +27,7 @@ int CS = 17;
 int CLK = 18;
 int RS = 4;
 
+
 //OLED
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -73,9 +74,8 @@ void addToHistory(float temp, float hum) {
 void drawGraph(float *dataArray, float minVal, float maxVal) {
   for (int i = 1; i < HISTORY_SIZE; i++) {
 
-    int x1 = i - 1;
+    int x1 = (i - 1);
     int x2 = i;
-
     float v1 = dataArray[(historyIndex + i - 1) % HISTORY_SIZE];
     float v2 = dataArray[(historyIndex + i) % HISTORY_SIZE];
 
@@ -95,13 +95,14 @@ void showGraphs() {
   display.setCursor(0, 0);
   display.print("Temp/Humidity Trends");
 
+  int graphWidth = HISTORY_SIZE;
+  int xOffset = (SCREEN_WIDTH - graphWidth) / 2;
   // Temperature (upper line)
   drawGraph(tempHistory, 15, 35);
 
+
   // Humidity (lower line)
   drawGraph(humHistory, 30, 90);
-
-  display.display();
 }
 
 //function to switch oled
@@ -139,8 +140,9 @@ void updateOLED() {
   display.display();
 }
 
-void setup() {
+void setup() { 
 Serial.begin(9600);
+
 //Leds
 pinMode(RedPin, OUTPUT);
 pinMode(GreenPin, OUTPUT);
