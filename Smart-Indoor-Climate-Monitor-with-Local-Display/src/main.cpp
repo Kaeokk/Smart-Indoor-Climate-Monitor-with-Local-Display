@@ -53,7 +53,7 @@ float humHigh = 60.0;
 // WEB SERVER
 WebServer server(80);
 
-#define HISTORY_SIZE 128
+#define HISTORY_SIZE 64
 float tempHistory[HISTORY_SIZE];
 float humHistory[HISTORY_SIZE];
 int historyIndex = 0;
@@ -249,7 +249,7 @@ server.handleClient();
     digitalWrite(GreenPin, HIGH);
   }
   // Record sensor every 2 seconds
-  if (millis() - lastSample > 2000) {
+  if (millis() - lastSample > 200) {
     lastSample = millis();
     float t = bme.readTemperature();
     float h = bme.readHumidity();
@@ -257,7 +257,7 @@ server.handleClient();
   }
 
   // Switch screen every 1 second
-  if (millis() - lastSwitchTime >= 1000) {
+  if (millis() - lastSwitchTime >= 2000) {
     lastSwitchTime = millis();
     showNumbers = !showNumbers;
     updateOLED();
