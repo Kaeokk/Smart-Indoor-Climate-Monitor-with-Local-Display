@@ -39,7 +39,7 @@ int BMESCL = 33;
 int BMESDA = 32;
 
 // BME280
-#define BME280_ADDRESS 0x76
+// #define BME280_ADDRESS 0x76
 Adafruit_BME280 bme;
 
 // Thresholds  for alerts
@@ -179,10 +179,12 @@ server.handleClient();
     digitalWrite(RedPin, LOW);
     digitalWrite(GreenPin, HIGH);
   }
- // Record sensor every 2 seconds
+  // Record sensor every 2 seconds
   if (millis() - lastSample > 2000) {
     lastSample = millis();
-    addToHistory(t, h);
+    float t = bme.readTemperature();
+    float h = bme.readHumidity();
+    addToHistory(t, h);   // I and H didnt exist
   }
 
   // Show graph on OLED
