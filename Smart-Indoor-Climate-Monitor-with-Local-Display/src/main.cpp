@@ -16,6 +16,10 @@
 const char* ssid = "Greg";
 const char* password = "password1234";
 
+// graph and numbers switch
+unsigned long lastSwitchTime = 0;
+bool showNumbers = true;
+
 // Defining OLED pinout
 int DIN = 23;
 int DC = 2;
@@ -100,6 +104,41 @@ void showGraphs() {
   display.display();
 }
 
+//function to switch oled
+void updateOLED() {
+  display.clearDisplay();
+
+  if (showNumbers) {
+    // ---------- BIG NUMBERS ----------
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.print("T:");
+    display.print(bme.readTemperature(), 1);
+    display.println("C");
+
+    display.setCursor(0, 25);
+    display.print("H:");
+    display.print(bme.readHumidity(), 1);
+    display.println("%");
+
+    display.setCursor(0, 50);
+    display.print("P:");
+    display.print((int)(bme.readPressure()/100));
+    display.println("hPa");
+  } else {
+    // ---------- GRAPH ----------
+    display.setTextSize(1);
+    display.setCursor(0, 0);
+    display.println("Temp & Hum Trend");
+
+    drawGraph(tempHistory, 15, 35);   // Temp line
+    drawGraph(humHistory,  30, 90);   // Hum line
+  }
+
+  display.display();
+}
+
 void setup() {
 Serial.begin(9600);
 //Leds
@@ -163,6 +202,7 @@ WiFi.begin(ssid, password);
 
   server.begin();                     
   Serial.println("Web server running");  
+  updateOLED();   // show first screen 
 }
 
 void loop() {
@@ -187,26 +227,10 @@ server.handleClient();
     addToHistory(t, h);   // I and H didnt exist
   }
 
-  // Show graph on OLED
-  showGraphs();
-  
-display.clearDisplay();
-display.setTextSize(2);
-display.setTextColor(SSD1306_WHITE);
-display.setCursor(0,0);
-display.print("T:");
-display.print(bme.readTemperature());
-display.println("C");
-
-
-display.print("H:");
-display.print(bme.readHumidity());
-display.println("%");
-
-display.print("P:");
-display.print(bme.readPressure());
-display.println("Pa");
-display.display();
+  // Switch screen every 1 second
+  if (millis() - lastSwitchTime >= 1000) {
+    lastSwitchTime = millis();
+    showNumbers = !showNumbers;
+    updateOLED();
+  }
 }
-
-
