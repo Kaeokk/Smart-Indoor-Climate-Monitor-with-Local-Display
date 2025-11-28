@@ -43,11 +43,16 @@ int BluePin = 26;
 int BMESCL = 33;
 int BMESDA = 32;
 
+//oled switching pin
+int buttonPin = 13;
+
+
+
 // BME280
 // #define BME280_ADDRESS 0x76
 Adafruit_BME280 bme;
 
-// Thresholds  for alerts
+// Thresholds  for alerts (starting)
 float tempHigh = 28.0;
 float humHigh = 60.0;
 
@@ -162,6 +167,9 @@ pinMode(BluePin, OUTPUT);
   display.display();
   delay(1000);
 
+  //oled switcing button
+  pinMode(buttonPin, INPUT_PULLUP);
+
   // Then BME280
   Wire.begin(BMESDA, BMESCL);
   if (!bme.begin(0x76) && !bme.begin(0x77)) {
@@ -185,38 +193,33 @@ WiFi.begin(ssid, password);
   Serial.println("All devices working");
 
   // WEB SERVER
-  server.on("/", [](){
+server.on("/", [](){
     server.send(200, "text/html",
-R"=====(<html><body style="background:#000;color:#0f0;font-family:Arial;text-align:center">
-<h1>T: <span id="t">??</span>&deg;C LIBRARY H: <span id="h">??</span>%</h1>
-<canvas id="c" width="600" height="300"></canvas><br>
+R"=====(<html>
+<body style="background:#000;color:#0f0;font-family:Arial;text-align:center">
+
+<h1>T: <span id="t">??</span>&deg;C | H: <span id="h">??</span>%</h1>
+
 Temp limit <input id="tl" size="2" value="28">
 Hum limit  <input id="hl" size="2" value="60">
 <button onclick="fetch('/set?t='+tl.value+'&h='+hl.value)">SET</button>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-var ctx=document.getElementById('c').getContext('2d');
-var chart=new Chart(ctx,{type:'line',data:{datasets:[
-  {label:'Temp',borderColor:'red',data:[]},
-  {label:'Hum',borderColor:'cyan',data:[]}
-]},options:{animation:false}});
-setInterval(()=>{fetch('/data').then(r=>r.text()).then(x=>{
-  var [t,h]=x.split(',');
-  document.getElementById('t').innerText=t;
-  document.getElementById('h').innerText=h;
-  chart.data.datasets[0].data.push(t);
-  chart.data.datasets[1].data.push(h);
-  chart.data.labels.push('');
-  if(chart.data.labels.length>50){
-    chart.data.labels.shift();
-    chart.data.datasets[0].data.shift();
-    chart.data.datasets[1].data.shift();
-  }
-  chart.update();
-})},2000);
+setInterval(()=>{
+  fetch('/data')
+    .then(r=>r.text())
+    .then(x=>{
+      let [t,h] = x.split(',');
+      document.getElementById('t').innerText = t;
+      document.getElementById('h').innerText = h;
+    });
+},2000);
 </script>
-</body></html>)=====");
-  });
+
+</body>
+</html>)=====");
+});
+
 
   server.on("/data", [](){
     server.send(200, "text/plain", 
@@ -250,7 +253,7 @@ server.handleClient();
     digitalWrite(RedPin, LOW);
     digitalWrite(GreenPin, HIGH);
   }
-  // Record sensor every 2 seconds
+  // Record sensor every .2 seconds
   if (millis() - lastSample > 200) {
     lastSample = millis();
     float t = bme.readTemperature();
@@ -258,10 +261,16 @@ server.handleClient();
     addToHistory(t, h);   // I and H didnt exist
   }
 
-  // Switch screen every 1 second
-  if (millis() - lastSwitchTime >= 2000) {
-    lastSwitchTime = millis();
+// BUTTON switching
+  static bool lastButtonState = HIGH;
+  bool buttonState = digitalRead(buttonPin);
+
+  if (lastButtonState == HIGH && buttonState == LOW) {  // falling edge
     showNumbers = !showNumbers;
-    updateOLED();
   }
+
+  lastButtonState = buttonState;
+
+  // Update OLED (every render call)
+  updateOLED();
 }
