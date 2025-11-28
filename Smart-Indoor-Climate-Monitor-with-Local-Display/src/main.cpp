@@ -91,24 +91,7 @@ void drawGraph(float *dataArray, float minVal, float maxVal) {
   }
 }
 
-// OLED: Draw temperature + humidity historical graph
-void showGraphs() {
-  display.clearDisplay();
 
-  display.setTextColor(SSD1306_WHITE);
-  display.setTextSize(1);
-  display.setCursor(0, 0);
-  display.print("Temp/Humidity Trends");
-
-  int graphWidth = HISTORY_SIZE;
-  int xOffset = (SCREEN_WIDTH - graphWidth) / 2;
-  // Temperature (upper line)
-  drawGraph(tempHistory, 15, 35);
-
-
-  // Humidity (lower line)
-  drawGraph(humHistory, 30, 90);
-}
 
 //function to switch oled
 void updateOLED() {
@@ -245,8 +228,12 @@ void loop() {
 //call server
 server.handleClient();
 
+//READ VALUES ONCE
+float temp = bme.readTemperature(); 
+float hum  = bme.readHumidity();
+
 //basic led alerts
-  if (bme.readTemperature() > tempHigh || bme.readHumidity() > humHigh) {
+  if (temp > tempHigh || hum > humHigh) {
     digitalWrite(RedPin, HIGH);
     digitalWrite(GreenPin, LOW);
   } else {
@@ -254,11 +241,9 @@ server.handleClient();
     digitalWrite(GreenPin, HIGH);
   }
   // Record sensor every .2 seconds
-  if (millis() - lastSample > 200) {
+ if (millis() - lastSample > 200) {
     lastSample = millis();
-    float t = bme.readTemperature();
-    float h = bme.readHumidity();
-    addToHistory(t, h);   // I and H didnt exist
+    addToHistory(temp, hum);
   }
 
 // BUTTON switching
