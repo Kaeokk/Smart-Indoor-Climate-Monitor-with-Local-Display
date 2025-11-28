@@ -180,7 +180,7 @@ server.on("/", []() {
   server.send(200, "text/html",
 R"=====(<body>
 
-T: <span id="t">??</span>deg&C | H: <span id="h">??</span>%<br>
+T: <span id="t">??</span>&deg;C | H: <span id="h">??</span>%<br>
 
 Temp: <input id="tl" size="2" value="28">
 Hum:  <input id="hl" size="2" value="60">
