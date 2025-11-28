@@ -176,32 +176,29 @@ WiFi.begin(ssid, password);
   Serial.println("All devices working");
 
   // WEB SERVER
-server.on("/", [](){
-    server.send(200, "text/html",
-R"=====(<html>
-<body style="background:#000;color:#0f0;font-family:Arial;text-align:center">
+server.on("/", []() {
+  server.send(200, "text/html",
+R"=====(<body>
 
-<h1>T: <span id="t">??</span>&deg;C | H: <span id="h">??</span>%</h1>
+T: <span id="t">??</span>deg&C | H: <span id="h">??</span>%<br>
 
-Temp limit <input id="tl" size="2" value="28">
-Hum limit  <input id="hl" size="2" value="60">
+Temp: <input id="tl" size="2" value="28">
+Hum:  <input id="hl" size="2" value="60">
 <button onclick="fetch('/set?t='+tl.value+'&h='+hl.value)">SET</button>
 
 <script>
 setInterval(()=>{
-  fetch('/data')
-    .then(r=>r.text())
-    .then(x=>{
-      let [t,h] = x.split(',');
-      document.getElementById('t').innerText = t;
-      document.getElementById('h').innerText = h;
-    });
+  fetch('/data').then(r=>r.text()).then(x=>{
+    [t,h] = x.split(',');
+    t=document.getElementById('t'); h=document.getElementById('h');
+    t.innerText = x.split(',')[0]; h.innerText = x.split(',')[1];
+  });
 },2000);
 </script>
 
-</body>
-</html>)=====");
+</body>)=====");
 });
+
 
 
   server.on("/data", [](){
