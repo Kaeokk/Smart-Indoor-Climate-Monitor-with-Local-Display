@@ -226,7 +226,7 @@ float hum  = bme.readHumidity();
   }
 
 //Button Handling
-if (digitalRead(butto) == LOW) {
+if (digitalRead(buttonPin) == LOW) {
 if (buttonPressStart == 0) buttonPressStart = millis(); // Start timer on press
 } else {
 // Button released: check duration
@@ -252,4 +252,5 @@ buttonPressStart = 0; // Reset timer
 // Final OLED Update
 if (!oledOff) {
 updateOLED(); 
-}}
+}
+}
