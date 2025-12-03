@@ -241,7 +241,7 @@ display.clearDisplay();
 display.display();
 }
 } else if (pressDuration > 50) { 
-// SHORT PRESS=Toggle Numbers/Graph
+// SHORT PRESS=Toggle Numbers and Graph 
 if (!oledOff) {
 showNumbers = !showNumbers;
 }
