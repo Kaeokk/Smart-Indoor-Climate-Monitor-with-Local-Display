@@ -175,7 +175,7 @@ setInterval(()=>{
     t=document.getElementById('t'); h=document.getElementById('h');
     t.innerText = x.split(',')[0]; h.innerText = x.split(',')[1];
   });
-},2000);
+},200);
 </script>
 
 </body>)=====");
