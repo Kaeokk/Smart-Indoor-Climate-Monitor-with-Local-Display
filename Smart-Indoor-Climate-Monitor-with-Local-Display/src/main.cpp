@@ -29,6 +29,11 @@ int RS = 4;
 #define SCREEN_HEIGHT 64
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, DC, RS, CS);
 
+//low power mode
+unsigned long buttonPressStart = 0;
+bool oledOff = false;
+
+
 
 // Defining RGB pinout
 int RedPin = 14;
@@ -207,8 +212,8 @@ float temp = bme.readTemperature();
 float hum  = bme.readHumidity();
 // Record sensor every .2 seconds
  if (millis() - lastSample > 200) {
-    lastSample = millis();
-    addToHistory(temp, hum);
+  lastSample = millis();
+  addToHistory(temp, hum);
   }
 
 // led alerts
@@ -220,17 +225,31 @@ float hum  = bme.readHumidity();
   digitalWrite(GreenPin, HIGH); 
   }
 
-// BUTTON switching
-  static bool lastButtonState = HIGH;
-  bool buttonState = digitalRead(buttonPin);
-
-  if (lastButtonState == HIGH && buttonState == LOW) {  // falling edge
-    showNumbers = !showNumbers;
-    updateOLED(); 
-    delay(50); 
-  }
-
-  lastButtonState = buttonState;
-    // Update OLED
-  updateOLED();
+//Button Handling
+if (digitalRead(butto) == LOW) {
+if (buttonPressStart == 0) buttonPressStart = millis(); // Start timer on press
+} else {
+// Button released: check duration
+if (buttonPressStart != 0) {
+unsigned long pressDuration = millis() - buttonPressStart;
+    
+if (pressDuration > 2000) {
+// LONG PRESS: Toggle OLED On/Off (Low Power Mode)
+oledOff = !oledOff;
+if (oledOff) {
+display.clearDisplay();
+display.display();
 }
+} else if (pressDuration > 50) { 
+// SHORT PRESS: Toggle Numbers/Graph
+if (!oledOff) {
+showNumbers = !showNumbers;
+}
+}
+buttonPressStart = 0; // Reset timer
+}
+}
+// Final OLED Update
+if (!oledOff) {
+updateOLED(); 
+}}
