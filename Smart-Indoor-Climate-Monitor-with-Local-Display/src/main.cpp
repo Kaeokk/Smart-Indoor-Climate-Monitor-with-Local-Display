@@ -229,19 +229,19 @@ float hum  = bme.readHumidity();
 if (digitalRead(buttonPin) == LOW) {
 if (buttonPressStart == 0) buttonPressStart = millis(); // Start timer on press
 } else {
-// Button released: check duration
+// Button released=check duration
 if (buttonPressStart != 0) {
 unsigned long pressDuration = millis() - buttonPressStart;
     
 if (pressDuration > 2000) {
-// LONG PRESS: Toggle OLED On/Off (Low Power Mode)
+// LONG PRESS=Toggle OLED On/Off (Low Power Mode)
 oledOff = !oledOff;
 if (oledOff) {
 display.clearDisplay();
 display.display();
 }
 } else if (pressDuration > 50) { 
-// SHORT PRESS: Toggle Numbers/Graph
+// SHORT PRESS=Toggle Numbers/Graph
 if (!oledOff) {
 showNumbers = !showNumbers;
 }
